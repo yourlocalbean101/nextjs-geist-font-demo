@@ -1,11 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Home, 
-  Users, 
-  MessageSquare, 
-  Calendar,
+import {
   Settings,
   Search,
   Plus,
@@ -13,9 +9,7 @@ import {
   User,
   Hash,
   Volume2,
-  AtSign,
-  Bookmark,
-  Dices
+  Video, // Added for video channels
 } from 'lucide-react';
 import { MascotWithSpeech } from '@/components/mascot/MascotWithSpeech';
 
@@ -24,29 +18,35 @@ interface DiscordStyleLayoutProps {
 }
 
 export const DiscordStyleLayout: React.FC<DiscordStyleLayoutProps> = ({ children }) => {
-  const [activeServer, setActiveServer] = useState('home');
-  const [activeChannel, setActiveChannel] = useState('general-chat');
+  const [activeServer, setActiveServer] = useState('art-edits');
+  const [activeChannel, setActiveChannel] = useState('clips');
 
   const serverList = [
-    { id: 'home', name: 'Home', icon: '🏰', active: true },
-    { id: 'rp-central', name: 'RP Central', icon: '🎭', active: false },
-    { id: 'character-hub', name: 'Characters', icon: '👤', active: false },
-    { id: 'dice-rolls', name: 'Dice Rolls', icon: '🎲', active: false },
+    { id: 'home', name: 'Home', icon: '🏠', active: false },
+    { id: 'art-edits', name: 'Art & Edits', icon: '🎨', active: true },
+    { id: 'gaming-clips', name: 'Gaming Clips', icon: '🎮', active: false },
+    { id: 'music-vibes', name: 'Music Vibes', icon: '🎵', active: false },
   ];
 
-  const channels = [
-    { id: 'welcome', name: 'welcome', type: 'text', unread: 3 },
-    { id: 'rules', name: 'rules', type: 'text' },
-    { id: 'announcements', name: 'announcements', type: 'text', unread: 1 },
+  const videoChannels = [
+    { id: 'clips', name: 'clips', type: 'video', unread: 42 },
+    { id: 'trends', name: 'trends', type: 'video', unread: 9 },
+    { id: 'challenges', name: 'challenges', type: 'video' },
+  ];
+
+  const textChannels = [
     { id: 'general-chat', name: 'general-chat', type: 'text', unread: 12 },
-    { id: 'character-creation', name: 'character-creation', type: 'text' },
-    { id: 'looking-for-rp', name: 'looking-for-rp', type: 'text', unread: 5 },
+    { id: 'introductions', name: 'introductions', type: 'text' },
+    { id: 'feedback', name: 'feedback', type: 'text', unread: 3 },
   ];
 
   const voiceChannels = [
-    { id: 'general-vc', name: 'General VC', type: 'voice', users: 5 },
-    { id: 'rp-session', name: 'RP Session', type: 'voice', users: 12 },
+    { id: 'live-reactions', name: 'Live Reactions', type: 'voice', users: 18 },
+    { id: 'music-lounge', name: 'Music Lounge', type: 'voice', users: 7 },
   ];
+
+  const allChannels = [...videoChannels, ...textChannels, ...voiceChannels];
+  const activeChannelData = allChannels.find(c => c.id === activeChannel);
 
   return (
     <div className="flex h-screen bg-gray-900 text-gray-100">
@@ -62,12 +62,12 @@ export const DiscordStyleLayout: React.FC<DiscordStyleLayoutProps> = ({ children
           <div
             key={server.id}
             className={`w-12 h-12 rounded-2xl flex items-center justify-center cursor-pointer hover:rounded-xl transition-all duration-200 relative group ${
-              server.active ? 'bg-indigo-600 rounded-xl' : 'bg-gray-700 hover:bg-gray-600'
+              activeServer === server.id ? 'bg-indigo-600 rounded-xl' : 'bg-gray-700 hover:bg-gray-600'
             }`}
             onClick={() => setActiveServer(server.id)}
           >
             <span className="text-lg group-hover:scale-110 transition-transform">{server.icon}</span>
-            {server.active && (
+            {activeServer === server.id && (
               <div className="absolute -left-1 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-white rounded-r-full" />
             )}
           </div>
@@ -81,13 +81,35 @@ export const DiscordStyleLayout: React.FC<DiscordStyleLayoutProps> = ({ children
       {/* Channel List */}
       <div className="w-64 bg-gray-800 flex flex-col">
         <div className="p-4 border-b border-gray-700">
-          <h2 className="font-bold text-white">Roleplay Realm</h2>
+          <h2 className="font-bold text-white">VibeVerse</h2>
         </div>
         
         <div className="flex-1 overflow-y-auto p-2">
+          {/* Video Channels */}
+          <div className="mb-4">
+            <h3 className="text-xs uppercase text-gray-400 font-bold mb-2">Video Feeds</h3>
+            {videoChannels.map((channel) => (
+              <div
+                key={channel.id}
+                className={`flex items-center px-2 py-1 rounded cursor-pointer hover:bg-gray-700 ${
+                  activeChannel === channel.id ? 'bg-gray-700' : ''
+                }`}
+                onClick={() => setActiveChannel(channel.id)}
+              >
+                <Video className="w-4 h-4 text-gray-400 mr-1" />
+                <span className="text-sm">{channel.name}</span>
+                {channel.unread && (
+                  <span className="ml-auto bg-red-500 text-xs rounded-full px-2 py-0.5">
+                    {channel.unread}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+
           <div className="mb-4">
             <h3 className="text-xs uppercase text-gray-400 font-bold mb-2">Text Channels</h3>
-            {channels.map((channel) => (
+            {textChannels.map((channel) => (
               <div
                 key={channel.id}
                 className={`flex items-center px-2 py-1 rounded cursor-pointer hover:bg-gray-700 ${
@@ -139,7 +161,7 @@ export const DiscordStyleLayout: React.FC<DiscordStyleLayoutProps> = ({ children
         {/* Header */}
         <div className="bg-gray-800 border-b border-gray-700 px-4 py-2 flex items-center justify-between">
           <div className="flex items-center">
-            <Hash className="w-5 h-5 text-gray-400 mr-1" />
+            {activeChannelData?.type === 'video' ? <Video className="w-5 h-5 text-gray-400 mr-1" /> : <Hash className="w-5 h-5 text-gray-400 mr-1" />}
             <span className="font-medium">{activeChannel}</span>
           </div>
           
